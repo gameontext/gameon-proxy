@@ -5,7 +5,7 @@
 #
 
 echo Informing slack...
-curl -X 'POST' --silent --data-binary '{"text":"A new build for the proxy has started."}' $WEBHOOK > /dev/null
+#curl -X 'POST' --silent --data-binary '{"text":"A new build for the proxy has started."}' $WEBHOOK > /dev/null
 mkdir dockercfg ; cd dockercfg
 echo Downloading Docker requirements..
 wget http://$BUILD_DOCKER_HOST:8081/dockerneeds.tar -q
