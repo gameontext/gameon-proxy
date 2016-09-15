@@ -44,5 +44,5 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
 else
   echo HAProxy will log to STDOUT--this is dev environment.
   sed -i s/PLACEHOLDER_PASSWORD/$ADMIN_PASSWORD/g /etc/haproxy/haproxy-dev.cfg
-  exec a8sidecar --log --proxy --supervise haproxy -f /etc/haproxy/haproxy-dev.cfg
+  exec a8sidecar --log --proxy
 fi

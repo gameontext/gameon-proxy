@@ -21,6 +21,9 @@ COPY ./haproxy.cfg /etc/haproxy/haproxy.cfg
 COPY ./haproxy-ics.cfg /etc/haproxy/haproxy-ics.cfg
 COPY ./haproxy-dev.cfg /etc/haproxy/haproxy-dev.cfg
 
+COPY ./logstash-lumberjack.conf /etc/nginx/logstash-lumberjack.conf
+COPY ./amalgam8-services-override.conf /etc/nginx/amalgam8-services.conf
+
 EXPOSE 80 443 1936
 
 ENTRYPOINT ["/opt/startup.sh"]
