@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Configure our link to etcd based on shared volume with secret
+if [ ! -z "$ETCD_SECRET" ]; then
+  . /data/primordial/setup.etcd.sh /data/primordial $ETCD_SECRET
+fi
+
 export A8_SERVICE=proxy
 
 if [ "$ETCDCTL_ENDPOINT" != "" ]; then
@@ -28,21 +33,35 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   sed -i s/PLACEHOLDER_DOCKERHOST/$(etcdctl get /proxy/docker-host)/g /etc/haproxy/haproxy.cfg
   sed -i s/PLACEHOLDER_LOGHOST/$(etcdctl get /logstash/endpoint)/g /etc/haproxy/haproxy.cfg
 
-
+  export AUTH_ENDPOINT=$(etcdctl get /endpoints/auth)
   export ROOM_ENDPOINT=$(etcdctl get /endpoints/room)
   export MAP_ENDPOINT=$(etcdctl get /endpoints/map)
   export MEDIATOR_ENDPOINT=$(etcdctl get /endpoints/mediator)
   export PLAYER_ENDPOINT=$(etcdctl get /endpoints/player)
   export WEBAPP_ENDPOINT=$(etcdctl get /endpoints/webapp)
   export SWAGGER_ENDPOINT=$(etcdctl get /endpoints/swagger)
+  export A8_REGISTRY_URL=$(etcdctl get /amalgam8/registryUrl)
+  export A8_CONTROLLER_URL=$(etcdctl get /amalgam8/controllerUrl)
+  export A8_CONTROLLER_POLL=$(etcdctl get /amalgam8/controllerPoll)
+  JWT=$(etcdctl get /amalgam8/jwt)
 
   sudo service rsyslog start 
 
   echo Starting haproxy...
-  haproxy -f $PROXY_CONFIG
+  if [ -z "$A8_REGISTRY_URL" ]; then 
+    #no a8, just run haproxy.
+    haproxy -f $PROXY_CONFIG
+  else
+    #a8, configure security, and run via sidecar.
+    if [ ! -z "$JWT" ]; then     
+      export A8_REGISTRY_TOKEN=$JWT
+      export A8_CONTROLLER_TOKEN=$JWT
+    fi  
+    exec a8sidecar --proxy haproxy -f $PROXY_CONFIG
+  fi  
   echo HAProxy shut down
 else
   echo HAProxy will log to STDOUT--this is dev environment.
   sed -i s/PLACEHOLDER_PASSWORD/$ADMIN_PASSWORD/g /etc/haproxy/haproxy-dev.cfg
-  exec a8sidecar --log --proxy --supervise haproxy -f /etc/haproxy/haproxy-dev.cfg
+  exec a8sidecar --proxy haproxy -f /etc/haproxy/haproxy-dev.cfg
 fi
