@@ -40,6 +40,7 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   export PLAYER_ENDPOINT=$(etcdctl get /endpoints/player)
   export WEBAPP_ENDPOINT=$(etcdctl get /endpoints/webapp)
   export SWAGGER_ENDPOINT=$(etcdctl get /endpoints/swagger)
+  export SLACKIN_ENDPOINT=$(etcdctl get /endpoints/slackin)
   export A8_REGISTRY_URL=$(etcdctl get /amalgam8/registryUrl)
   export A8_CONTROLLER_URL=$(etcdctl get /amalgam8/controllerUrl)
   export A8_CONTROLLER_POLL=$(etcdctl get /amalgam8/controllerPoll)
