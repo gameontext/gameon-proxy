@@ -6,4 +6,4 @@ See the proxy [information page](https://gameontext.gitbooks.io/gameon-gitbook/c
 
 Want to help! Pile On! 
 
-[Contributing to Game On!](https://github.com/gameontext/gameon/blob/master/CONTRIBUTING.md)
+[Contributing to Game On!](CONTRIBUTING.md)
