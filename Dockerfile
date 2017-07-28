@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y wget ca-certificates --no-install-recom
 
 RUN wget -qO- https://github.com/amalgam8/amalgam8/releases/download/v0.4.2/a8sidecar.sh | sh
 
-RUN ln -s /usr/local/etc/haproxy /etc/
-RUN mkdir -p /run/haproxy/
+RUN ln -s /usr/local/etc/haproxy /etc/ && \
+    mkdir -p /run/haproxy/
 
 RUN wget https://github.com/coreos/etcd/releases/download/v2.2.2/etcd-v2.2.2-linux-amd64.tar.gz -q && \
     tar xzf etcd-v2.2.2-linux-amd64.tar.gz etcd-v2.2.2-linux-amd64/etcdctl --strip-components=1 && \
