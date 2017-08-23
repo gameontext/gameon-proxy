@@ -6,17 +6,18 @@ language: java
 jdk:
 - openjdk8
 env:
-- COMMIT=${TRAVIS_COMMIT::8}
-- REPO_IMAGE=${DOCKER_REPO}/${DOCKER_IMAGE}
+  global:
+  - COMMIT="${TRAVIS_COMMIT::8}"
+  - REPO_IMAGE="${DOCKER_REPO}/${DOCKER_IMAGE}"
 script:
 - echo "TRAVIS_BRANCH='$TRAVIS_BRANCH'" \
-  ;if [ "$TRAVIS_BRANCH" == "master" ]; then
+  ;if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
      echo "Building and Pushing new image" \
      && docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}" && echo "Login ok" \
-     && docker build -t ${REPO_IMAGE}:${COMMIT} ${DOCKER_BUILDDIR} && echo "Build complete" \
+     && docker build -t ${REPO_IMAGE}:${COMMIT} ${DOCKER_BUILDDIR} && echo "Build complete ${REPO_IMAGE}:${COMMIT}" \
      && docker tag ${REPO_IMAGE}:${COMMIT} ${REPO_IMAGE}:latest \
      && docker tag ${REPO_IMAGE}:${COMMIT} ${REPO_IMAGE}:travis-${TRAVIS_BUILD_NUMBER} \
-     && docker push ${REPO_IMAGE} && echo "Push complete"
+     && docker push ${REPO_IMAGE}:${COMMIT} && echo "Push complete"
   ;else
      echo "Not master branch, skipping docker"
   ;fi
