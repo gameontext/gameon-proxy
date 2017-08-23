@@ -5,16 +5,16 @@ services:
 language: java
 jdk:
 - openjdk8
+env:
+  global:
+  - COMMIT="${TRAVIS_COMMIT::8}"
+  - IMAGE="${DOCKER_REPO}/${DOCKER_IMAGE}"
+  - GIT_TAG="${IMAGE}:${COMMIT}"
+  - BUILD_TAG="${IMAGE}:0.1.${TRAVIS_BUILD_NUMBER}"
+  - LATEST_TAG="${IMAGE}:latest"
 script:
-- echo "TRAVIS_BRANCH='$TRAVIS_BRANCH'" \
-  ;if [ "$TRAVIS_BRANCH" == "master" ]; then
-     echo "Building and Pushing new image" \
-     && docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}" && echo "Login ok" \
-     && docker build -t ${DOCKER_REPO}/${DOCKER_IMAGE} ${DOCKER_BUILDDIR} && echo "Build complete" \
-     && docker push ${DOCKER_REPO}/${DOCKER_IMAGE} && echo "Push complete"
-  ;else
-     echo "Not master branch, skipping docker"
-  ;fi
+- echo "TRAVIS_BRANCH='$TRAVIS_BRANCH'"
+- bash <(curl -s https://raw.githubusercontent.com/gameontext/gameon/master/images/dockerhub.sh)
 notifications:
   slack:
     secure: ku8lLqYVulAUpmHIdzY6ImRpSVi8fJh+GMeTB1lHW3UNeCc+5TOqNeN1Q/4rppo9en/WH0vjroK6E/yr6F3yzR7QW2IjGhuJHD3TX4pwHF4e5FAmcq0o6CNqY8y2AdM8BO1yQeiXwygzQ0QkNkeeBdQ58oovMxtOJ3u/zFI05cl1UInBNxpGD5B+PMSMX6RjsCy8MHuV4PpXKQITb8L243i2eoTd2LKnYQAJMDpABahk+bPGV3XYssAWq6vRtsZkFuQ+NFG7JB3LuLkU46C9lCnqwO1B7KNfjWVpcKVoEDCsV5KAcwpMW9d2k7d8OCiR1syhPUeUB/Kir0Sq0VQeRiV+ALKfiZiK0nzVM90owlTr0mtodypRnUpuhqzoDIimLIHAxkJLWyh/BXArtA1J/uN3dn4bSjy+evNaUXFZ1Z3dk6AmAsdBHJKUb+V8OPR1Xd249VuNbht2h/U35xrAFpDGzZJCacRvtKSiKNsjGIKIUrgYT23x/vvWpTD1mfT1ylkHDxyYM021YtqeCUpDPB8qunMQ678z33z9pHVMbGYrav2kSrBBIB5gWaKvS8SXLVVwO7T37IchGNKFpFKcB3WbWNt7CXHgwxFx+WeCEwcVesagC2HayY14vaN4CwzkNZtyIiggdaJnQWBh9/uQHR/PJXyEjqS/ijmZRka8yOQ=

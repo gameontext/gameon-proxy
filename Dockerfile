@@ -1,10 +1,8 @@
-FROM haproxy:1.6
+FROM haproxy:1.7.9
 
-MAINTAINER Ben Smith (benjsmi@us.ibm.com)
+LABEL maintainer="Erin Schnabel <schnabel@us.ibm.com> (@ebullientworks)"
 
 RUN apt-get update && apt-get install -y wget ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
-RUN wget -qO- https://github.com/amalgam8/amalgam8/releases/download/v0.4.2/a8sidecar.sh | sh
 
 RUN ln -s /usr/local/etc/haproxy /etc/ && \
     mkdir -p /run/haproxy/
