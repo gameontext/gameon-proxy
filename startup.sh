@@ -8,7 +8,7 @@ fi
 
 if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   if [ "$PROXY_CONFIG" == "" ]; then
-    PROXY_CONFIG=/etc/haproxy/haproxy.cfg
+    PROXY_CONFIG=/opt/haproxy/haproxy.cfg
   fi
 
   echo Setting up etcd...
@@ -38,12 +38,11 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   sudo service rsyslog start
 else
   if [ "$PROXY_CONFIG" == "" ]; then
-    PROXY_CONFIG=/etc/haproxy/haproxy-dev.cfg
+    PROXY_CONFIG=/opt/haproxy/haproxy-dev.cfg
   fi
 
-  sed -i s/PLACEHOLDER_PASSWORD/$ADMIN_PASSWORD/g /etc/haproxy/haproxy-dev.cfg
+  sed -i s/PLACEHOLDER_PASSWORD/$ADMIN_PASSWORD/g /opt/haproxy/haproxy-dev.cfg
 fi
 
 echo Starting haproxy...
-haproxy -f $PROXY_CONFIG
-echo HAProxy shut down
+exec /docker-entrypoint.sh -f $PROXY_CONFIG
