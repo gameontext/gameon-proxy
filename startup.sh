@@ -29,9 +29,8 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   echo "Using config file $PROXY_CONFIG"
 
   etcdctl get /proxy/third-party-ssl-cert > /etc/ssl/proxy.pem
-  sed -i s/PLACEHOLDER_PASSWORD/$(etcdctl get /passwords/admin-password)/g /etc/haproxy/haproxy.cfg
-  sed -i s/PLACEHOLDER_DOCKERHOST/$(etcdctl get /proxy/docker-host)/g /etc/haproxy/haproxy.cfg
-  sed -i s/PLACEHOLDER_LOGHOST/$(etcdctl get /logstash/endpoint)/g /etc/haproxy/haproxy.cfg
+
+  sed -i s/PLACEHOLDER_PASSWORD/$(etcdctl get /passwords/admin-password)/g /opt/haproxy/haproxy.cfg
 
   export SLACKIN_ENDPOINT=$(etcdctl get /endpoints/slackin)
 
