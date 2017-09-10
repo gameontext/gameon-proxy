@@ -2,17 +2,23 @@ FROM haproxy:1.7.9
 
 LABEL maintainer="Erin Schnabel <schnabel@us.ibm.com> (@ebullientworks)"
 
+ENV ETCD_VERSION 2.2.2
+
 RUN apt-get update \
-  && apt-get install -y wget ca-certificates --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends \
+     ca-certificates  \
+     curl \
+     wget \
+  && rm -rf /var/lib/apt/lists/* \
+  \
+# setup etcd
+  && wget https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -q \
+  && tar xzf etcd-v${ETCD_VERSION}-linux-amd64.tar.gz etcd-v${ETCD_VERSION}-linux-amd64/etcdctl --strip-components=1 \
+  && rm etcd-v${ETCD_VERSION}-linux-amd64.tar.gz \
+  && mv etcdctl /usr/local/bin/etcdctl
 
 RUN mkdir -p /run/haproxy \
     mkdir -p /opt/haproxy
-
-RUN wget https://github.com/coreos/etcd/releases/download/v2.2.2/etcd-v2.2.2-linux-amd64.tar.gz -q && \
-    tar xzf etcd-v2.2.2-linux-amd64.tar.gz etcd-v2.2.2-linux-amd64/etcdctl --strip-components=1 && \
-    rm etcd-v2.2.2-linux-amd64.tar.gz && \
-    mv etcdctl /usr/local/bin/etcdctl
 
 COPY ./proxy.pem       /etc/ssl/proxy.pem
 COPY ./startup.sh      /opt/startup.sh
