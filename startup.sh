@@ -31,10 +31,6 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   etcdctl get /proxy/third-party-ssl-cert > /etc/ssl/proxy.pem
 
   sed -i s/PLACEHOLDER_PASSWORD/$(etcdctl get /passwords/admin-password)/g /opt/haproxy/haproxy.cfg
-
-  export SLACKIN_ENDPOINT=$(etcdctl get /endpoints/slackin)
-
-  sudo service rsyslog start
 else
   if [ "$PROXY_CONFIG" == "" ]; then
     PROXY_CONFIG=/opt/haproxy/haproxy-dev.cfg
