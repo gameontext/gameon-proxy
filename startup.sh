@@ -1,43 +1,58 @@
-#!/bin/bash
+#!/bin/sh
 
 # Configure our link to etcd based on shared volume with secret
 if [ ! -z "$ETCD_SECRET" ]; then
   . /data/primordial/setup.etcd.sh /data/primordial $ETCD_SECRET
 fi
 
+log() {
+  if [ "${GAMEON_LOG_FORMAT}" == "json" ]; then
+    # This needs to be escaped using jq
+    echo '{"message":"'$1'"}'
+  else
+    echo $1
+  fi
+}
 
 if [ "$ETCDCTL_ENDPOINT" != "" ]; then
-  if [ "$PROXY_CONFIG" == "" ]; then
-    PROXY_CONFIG=/opt/haproxy/haproxy.cfg
-  fi
-
-  echo Setting up etcd...
-  echo "** Testing etcd is accessible"
-  etcdctl --debug ls
-  RC=$?
-
+  log Setting up etcd...
+  local RC=1
+  local count=0
   while [ $RC -ne 0 ]; do
+    if [ $count -gt 15 ]; then
+      log "Unable to reach etcd"
+      exit 1
+    fi
+
+    log "** Testing etcd is accessible"
+    etcdctl --debug ls
+    RC=$?
+    if [ $RC -ne 0 ]; then
       sleep 15
-
-      # recheck condition
-      echo "** Re-testing etcd connection"
-      etcdctl --debug ls
-      RC=$?
+      ((count++))
+    fi
   done
-  echo "etcdctl returned sucessfully, continuing"
+  log "etcdctl returned sucessfully, continuing"
 
-  echo "Using config file $PROXY_CONFIG"
-
-  etcdctl get /proxy/third-party-ssl-cert > /etc/ssl/proxy.pem
-
-  sed -i s/PLACEHOLDER_PASSWORD/$(etcdctl get /passwords/admin-password)/g /opt/haproxy/haproxy.cfg
-else
-  if [ "$PROXY_CONFIG" == "" ]; then
-    PROXY_CONFIG=/opt/haproxy/haproxy-dev.cfg
-  fi
-
-  sed -i s/PLACEHOLDER_PASSWORD/$ADMIN_PASSWORD/g /opt/haproxy/haproxy-dev.cfg
+  etcdctl get /proxy/cert > /etc/cert/cert.pem
 fi
 
-echo Starting haproxy...
-exec /docker-entrypoint.sh -f $PROXY_CONFIG
+if [ ! -f /etc/cert/cert.pem ]; then
+  log "Unable to find certificate /etc/cert/cert.pem"
+  exit 1
+fi
+
+if [ ! -f /etc/cert/private.pem ]; then
+  awk '/-----BEGIN PRIVATE KEY-----/{x=++i}{print > "something"x".pem"}' /etc/cert/cert.pem
+  mv something.pem /etc/cert/server.pem
+  mv something1.pem /etc/cert/private.pem
+  find /etc/cert/
+fi
+
+if [ "${GAMEON_LOG_FORMAT}" == "json" ]; then
+  sed -i -e "s/access\.log .*$/access.log json_combined;/" /etc/nginx/nginx.conf
+else
+  sed -i -e "s/access\.log .*$/access.log combined;/" /etc/nginx/nginx.conf
+fi
+
+exec nginx
