@@ -3,14 +3,14 @@
 log() {
   if [ "${GAMEON_LOG_FORMAT}" == "json" ]; then
     # This needs to be escaped using jq
-    echo '{"message":"'$1'"}'
+    echo '{"message":"'$@'"}'
   else
-    echo $1
+    echo $@
   fi
 }
 
 if [ "$ETCDCTL_ENDPOINT" != "" ]; then
-  log Setting up etcd...
+  log "Setting up etcd..."
   etcdctl --debug ls
   RC=$?
   while [ $RC -ne 0 ]; do
@@ -43,4 +43,5 @@ else
   sed -i -e "s/access\.log .*$/access.log combined;/" /etc/nginx/nginx.conf
 fi
 
+log "Init complete. Starting nginx"
 exec nginx
