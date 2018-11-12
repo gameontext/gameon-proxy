@@ -2,7 +2,15 @@ FROM nginx:stable-alpine
 
 LABEL maintainer="Erin Schnabel <schnabel@us.ibm.com> (@ebullientworks)"
 
-RUN apk add --no-cache jq
+RUN apk add --no-cache jq wget curl tar
+
+ENV ETCD_VERSION 2.2.2
+
+# setup etcd
+RUN wget https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -q \
+  && tar xzf etcd-v${ETCD_VERSION}-linux-amd64.tar.gz etcd-v${ETCD_VERSION}-linux-amd64/etcdctl --strip-components=1 \
+  && rm etcd-v${ETCD_VERSION}-linux-amd64.tar.gz \
+  && mv etcdctl /usr/local/bin/etcdctl
 
 COPY nginx.conf        /etc/nginx/nginx.conf
 COPY startup.sh        /opt/startup.sh
