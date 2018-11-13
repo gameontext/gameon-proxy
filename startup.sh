@@ -22,7 +22,8 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   done
   log "etcdctl returned sucessfully, continuing"
 
-  etcdctl get /proxy/cert > /etc/cert/cert.pem
+  mkdir -p /etc/cert
+  etcdctl get /proxy/third-party-ssl-cert > /etc/cert/cert.pem
 fi
 
 if [ ! -f /etc/cert/cert.pem ]; then
@@ -31,7 +32,7 @@ if [ ! -f /etc/cert/cert.pem ]; then
 fi
 
 if [ ! -f /etc/cert/private.pem ]; then
-  awk '/-----BEGIN PRIVATE KEY-----/{x=++i}{print > "something"x".pem"}' /etc/cert/cert.pem
+  awk '/-----BEGIN.*PRIVATE KEY-----/{x=++i}{print > "something"x".pem"}' /etc/cert/cert.pem
   mv something.pem /etc/cert/server.pem
   mv something1.pem /etc/cert/private.pem
   find /etc/cert/
