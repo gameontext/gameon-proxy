@@ -1,5 +1,9 @@
 #!/bin/sh
 
+conf_dir=/tmp
+cert_dir=/tmp/proxy-cert
+mkdir ${cert_dir}
+
 log() {
   if [ "${GAMEON_LOG_FORMAT}" == "json" ]; then
     # This needs to be escaped using jq
@@ -8,6 +12,9 @@ log() {
     echo $@
   fi
 }
+
+log "using /tmp for config"
+cp /etc/nginx/nginx.conf ${conf_dir}/nginx.conf
 
 if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   log "Setting up etcd..."
@@ -22,27 +29,32 @@ if [ "$ETCDCTL_ENDPOINT" != "" ]; then
   done
   log "etcdctl returned sucessfully, continuing"
 
-  mkdir -p /etc/cert
-  etcdctl get /proxy/third-party-ssl-cert > /etc/cert/cert.pem
+  etcdctl get /proxy/third-party-ssl-cert > ${cert_dir}/cert.pem
+else
+  log "Setting up certificate..."
+  cp /etc/cert/cert.pem ${cert_dir}/cert.pem
 fi
 
-if [ ! -f /etc/cert/cert.pem ]; then
-  log "Unable to find certificate /etc/cert/cert.pem"
+if [ ! -f ${cert_dir}/cert.pem ]; then
+  log "Unable to find certificate"
   exit 1
+else
+  old_dir=$PWD
+  cd ${cert_dir}
+  awk '/-----BEGIN.*PRIVATE KEY-----/{x=++i}{print > "something"x".pem"}' cert.pem
+  mv something.pem server.pem
+  mv something1.pem private.pem
+  cd $old_dir
 fi
 
-if [ ! -f /etc/cert/private.pem ]; then
-  awk '/-----BEGIN.*PRIVATE KEY-----/{x=++i}{print > "something"x".pem"}' /etc/cert/cert.pem
-  mv something.pem /etc/cert/server.pem
-  mv something1.pem /etc/cert/private.pem
-  find /etc/cert/
-fi
+ls -al /var/cache/nginx
+whoami
 
 if [ "${GAMEON_LOG_FORMAT}" == "json" ]; then
-  sed -i -e "s/access\.log .*$/access.log json_combined;/" /etc/nginx/nginx.conf
+  sed -i -e "s/access\.log .*$/access.log json_combined;/" ${conf_dir}/nginx.conf
 else
-  sed -i -e "s/access\.log .*$/access.log combined;/" /etc/nginx/nginx.conf
+  sed -i -e "s/access\.log .*$/access.log combined;/" ${conf_dir}/nginx.conf
 fi
 
 log "Init complete. Starting nginx"
-exec nginx
+exec nginx -c ${conf_dir}/nginx.conf
