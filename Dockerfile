@@ -28,4 +28,4 @@ ENTRYPOINT ["/opt/startup.sh"]
 HEALTHCHECK \
   --timeout=10s \
   --start-period=40s \
-  CMD wget -q -O /dev/null http://localhost/health
+  CMD wget -q -O /dev/null http://localhost:8080/proxy/health

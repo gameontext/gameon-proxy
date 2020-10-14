@@ -47,9 +47,6 @@ else
   cd $old_dir
 fi
 
-ls -al /var/cache/nginx
-whoami
-
 if [ "${GAMEON_LOG_FORMAT}" == "json" ]; then
   sed -i -e "s/access\.log .*$/access.log json_combined;/" ${conf_dir}/nginx.conf
 else
