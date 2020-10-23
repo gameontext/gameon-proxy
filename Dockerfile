@@ -2,7 +2,7 @@ FROM nginx:stable-alpine
 
 LABEL maintainer="Erin Schnabel <schnabel@us.ibm.com> (@ebullientworks)"
 
-RUN apk add --no-cache jq wget curl tar
+RUN apk add --no-cache jq wget tar
 
 ENV ETCD_VERSION 2.2.2
 
