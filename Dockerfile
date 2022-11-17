@@ -1,6 +1,6 @@
 FROM nginx:stable-alpine
 
-LABEL maintainer="Erin Schnabel <schnabel@us.ibm.com> (@ebullientworks)"
+LABEL maintainer="Erin Schnabel <ebullient@redhat.com> (@ebullientworks)"
 
 RUN apk add --no-cache jq wget tar
 
